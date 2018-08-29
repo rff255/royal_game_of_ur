@@ -32,6 +32,13 @@ def draw_triangle(surface, color, center, side, thickness=5):
   height = int(side / 2 * math.sqrt(3))
   vertices = [(x - side, y + height), ((x + side), y + height), (x, y - height)]
   pygame.draw.polygon(surface, color, vertices, thickness)
+  spot_y_center = int(y - height + 2 * height / math.sqrt(3))
+  return x, spot_y_center
+
+
+def roll_dice(surface, center, radius=10):
+  color = WHITE if random.randint(0, 1) else BLACK
+  pygame.draw.circle(surface, color, (center[0], center[1]), radius)
 
 
 def main():
@@ -56,8 +63,12 @@ def main():
     else:
       pygame.draw.rect(background, WHITE, [(i + left_offset)*tile_length, 2*tile_length, tile_length, tile_length], TILE_WIDTH)
 
-  for i in range(4):
-    draw_triangle(background, WHITE, ((9 + left_offset) * tile_length + (i * tile_length), 2 * tile_length + tile_length // 3), 3 * tile_length // 7)
+  dice_centers = [((9 + left_offset) * tile_length + (i * tile_length), 2 * tile_length + tile_length // 3) for i in range(4)]
+  spot_centers = []
+  for center in dice_centers:
+    spot_center = draw_triangle(background, WHITE, center, 3 * tile_length // 7)
+    roll_dice(background, spot_center)
+    spot_centers.append(spot_center)
 
 
   if pygame.font:
