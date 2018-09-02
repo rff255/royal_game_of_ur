@@ -42,6 +42,26 @@ def roll_dice(surface, center, radius=10):
   pygame.draw.circle(surface, color, (center[0], center[1]), radius)
 
 
+def get_center_maker(tile_centers):
+  side_length = tile_centers[1][0] - tile_centers[0][0]
+  def get_center(player, index):
+    if index >= 5 and index <= 12:
+      return tile_centers[index-5]
+    else:
+      if index < 5:
+        tile = tile_centers[4 - index]
+      else:
+        tile = tile_centers[20 - index]
+      return tile[0], tile[1] + (side_length if player else -side_length)
+  return get_center
+
+def add_piece(surface, center, color=RED):
+  pygame.draw.circle(surface, color, center, 25)
+
+def remove_piece(surface, center, color=GREY):
+  add_piece(surface, center, color)
+
+
 def main():
   pygame.init()
   clock = pygame.time.Clock()
@@ -63,6 +83,8 @@ def main():
     tile_centers.append(pygame.draw.rect(background, WHITE, [(i + left_offset)*tile_length, 2*tile_length, tile_length, tile_length], TILE_WIDTH).center)
   # Color safe space differently
   pygame.draw.rect(background, GREEN, [(3 + left_offset)*tile_length, 2*tile_length, tile_length, tile_length], TILE_WIDTH).center
+
+  get_center = get_center_maker(tile_centers)
 
   dice_centers = [((9 + left_offset) * tile_length + (i * tile_length), 2 * tile_length + tile_length // 3) for i in range(4)]
   spot_centers = []
