@@ -22,6 +22,7 @@ BLACK           = (0, 0, 0)
 GREY            = (100, 100, 100)
 WHITE           = (255, 255, 255)
 RED             = (255, 0, 0)
+GREEN           = (0, 255, 0)
 BLUE            = (0, 0, 255)
 
 TILE_WIDTH      = 10
@@ -53,15 +54,15 @@ def main():
   background.fill(GREY)
   tile_length = min(SCREEN_WIDTH // 14, SCREEN_HEIGHT // 5)
 
+  tile_centers = []
   left_offset = 1
   for j in [1, 3]:
     for i in list(range(4)) + [6, 7]:
       pygame.draw.rect(background, WHITE, [(i + left_offset)*tile_length, j*tile_length, tile_length, tile_length], TILE_WIDTH)
   for i in range(8):
-    if i == 5:
-      pygame.draw.rect(background, WHITE, [(i + left_offset)*tile_length, 2*tile_length, tile_length, tile_length], TILE_WIDTH*3)
-    else:
-      pygame.draw.rect(background, WHITE, [(i + left_offset)*tile_length, 2*tile_length, tile_length, tile_length], TILE_WIDTH)
+    tile_centers.append(pygame.draw.rect(background, WHITE, [(i + left_offset)*tile_length, 2*tile_length, tile_length, tile_length], TILE_WIDTH).center)
+  # Color safe space differently
+  pygame.draw.rect(background, GREEN, [(3 + left_offset)*tile_length, 2*tile_length, tile_length, tile_length], TILE_WIDTH).center
 
   dice_centers = [((9 + left_offset) * tile_length + (i * tile_length), 2 * tile_length + tile_length // 3) for i in range(4)]
   spot_centers = []
