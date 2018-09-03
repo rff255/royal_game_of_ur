@@ -62,6 +62,36 @@ def remove_piece(surface, center, color=GREY):
   add_piece(surface, center, color)
 
 
+class Player:
+  def __init__(self, screen, side, color, tile_centers, tile_length):
+    self.screen = screen
+    self.side = side
+    self.color = color
+    self.tile_centers = tile_centers
+    self.tile_length = tile_length
+    self.pieces = [0]*14
+    self.total = 7
+    self.reserve = 0
+    self.finished = 0
+
+    self.reserve_centers = [
+      (tile_centers[0][0] + i * 75,
+      tile_centers[0][1] + self.tile_length * 2 * (1 if self.side else -1))
+      for i in range(self.total)]
+
+    for _ in range(self.total):
+      self.add_reserve()
+
+  def add_reserve(self):
+    add_piece(self.screen, self.reserve_centers[self.reserve], self.color)
+    self.reserve += 1
+
+  def remove_reserve(self):
+    if self.reserve > 0:
+      self.reserve -= 1
+      remove_piece(self.screen, self.reserve_centers[self.reserve])
+
+
 def main():
   pygame.init()
   clock = pygame.time.Clock()
@@ -108,6 +138,8 @@ def main():
     button_text_pos.left = rolled_text_pos.left
     background.blit(button_text, button_text_pos)
 
+  p = Player(background, 0, RED, tile_centers, tile_length)
+  p = Player(background, 1, BLUE, tile_centers, tile_length)
 
   running = True
   while running:
