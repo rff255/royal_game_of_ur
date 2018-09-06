@@ -108,6 +108,21 @@ class Player:
     return False
 
 
+class Board:
+  def __init__(self, screen, tiles, tile_length):
+    self.screen = screen
+    self.tiles = tiles
+    self.tile_length = tile_length
+
+    self.top_player = Player(screen, 0, RED, tiles, tile_length)
+    self.bottom_player = Player(screen, 1, BLUE, tiles, tile_length)
+
+  def add_reserve(self, player):
+    return (self.bottom_player if player else self.top_player).add_reserve()
+
+  def remove_reserve(self, player):
+    return (self.bottom_player if player else self.top_player).remove_reserve()
+
 
 def main():
   pygame.init()
@@ -153,9 +168,7 @@ def main():
     button_text_pos.left = rolled_text_pos.left
     background.blit(button_text, button_text_pos)
 
-  top_player = Player(background, 0, RED, tiles, tile_length)
-  bottom_player = Player(background, 1, BLUE, tiles, tile_length)
-
+  board = Board(background, tiles, tile_length)
   screen.blit(background, (0, 0))
 
   running = True
@@ -168,10 +181,11 @@ def main():
 
     if event.type == MOUSEBUTTONUP:
       click = event.button
+      player = event.pos[1] > tiles[0].centery
       if click == 1: # left click
-        bottom_player.add_reserve()
+        board.add_reserve(player)
       elif click == 3: # right click
-        bottom_player.remove_reserve()
+        board.remove_reserve(player)
 
     screen.blit(background, (0, 0))
     pygame.display.update()
