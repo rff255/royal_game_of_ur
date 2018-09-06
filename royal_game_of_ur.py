@@ -141,16 +141,16 @@ def main():
   p = Player(background, 0, RED, tile_centers, tile_length)
   p = Player(background, 1, BLUE, tile_centers, tile_length)
 
+  screen.blit(background, (0, 0))
+
   running = True
   while running:
-    for event in pygame.event.get():
-      if event.type == QUIT:
-        running = False
+    event = pygame.event.wait()
+    if event.type == QUIT:
+      running = False
 
-    screen.blit(background, (0, 0))
 
     pygame.display.update()
-    clock.tick(60)
 
 
   pygame.quit()
