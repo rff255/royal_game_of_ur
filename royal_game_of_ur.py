@@ -42,16 +42,16 @@ def roll_dice(surface, center, radius=10):
   pygame.draw.circle(surface, color, (center[0], center[1]), radius)
 
 
-def get_center_maker(tile_centers):
-  side_length = tile_centers[1][0] - tile_centers[0][0]
+def get_center_maker(tiles):
+  side_length = tiles[1].center[0] - tiles[0].center[0]
   def get_center(player, index):
     if index >= 5 and index <= 12:
-      return tile_centers[index-5]
+      return tiles[index-5].center
     else:
       if index < 5:
-        tile = tile_centers[4 - index]
+        tile = tiles[4 - index].center
       else:
-        tile = tile_centers[20 - index]
+        tile = tiles[20 - index].center
       return tile[0], tile[1] + (side_length if player else -side_length)
   return get_center
 
@@ -63,11 +63,11 @@ def remove_piece(surface, center, color=GREY):
 
 
 class Player:
-  def __init__(self, screen, side, color, tile_centers, tile_length):
+  def __init__(self, screen, side, color, tiles, tile_length):
     self.screen = screen
     self.side = side
     self.color = color
-    self.tile_centers = tile_centers
+    self.tiles = tiles
     self.tile_length = tile_length
     self.pieces = [0]*14
     self.total = 7
@@ -75,8 +75,8 @@ class Player:
     self.finished = 0
 
     self.reserve_centers = [
-      (tile_centers[0][0] + i * 75,
-      tile_centers[0][1] + self.tile_length * 2 * (1 if self.side else -1))
+      (tiles[0].center[0] + i * 75,
+      tiles[0].center[1] + self.tile_length * 2 * (1 if self.side else -1))
       for i in range(self.total)]
 
     for _ in range(self.total):
@@ -105,17 +105,17 @@ def main():
   background.fill(GREY)
   tile_length = min(SCREEN_WIDTH // 14, SCREEN_HEIGHT // 5)
 
-  tile_centers = []
+  tiles = []
   left_offset = 1
   for j in [1, 3]:
     for i in list(range(4)) + [6, 7]:
       pygame.draw.rect(background, WHITE, [(i + left_offset)*tile_length, j*tile_length, tile_length, tile_length], TILE_WIDTH)
   for i in range(8):
-    tile_centers.append(pygame.draw.rect(background, WHITE, [(i + left_offset)*tile_length, 2*tile_length, tile_length, tile_length], TILE_WIDTH).center)
+    tiles.append(pygame.draw.rect(background, WHITE, [(i + left_offset)*tile_length, 2*tile_length, tile_length, tile_length], TILE_WIDTH))
   # Color safe space differently
-  pygame.draw.rect(background, GREEN, [(3 + left_offset)*tile_length, 2*tile_length, tile_length, tile_length], TILE_WIDTH).center
+  pygame.draw.rect(background, GREEN, [(3 + left_offset)*tile_length, 2*tile_length, tile_length, tile_length], TILE_WIDTH)
 
-  get_center = get_center_maker(tile_centers)
+  get_center = get_center_maker(tiles)
 
   dice_centers = [((9 + left_offset) * tile_length + (i * tile_length), 2 * tile_length + tile_length // 3) for i in range(4)]
   spot_centers = []
@@ -139,8 +139,8 @@ def main():
     button_text_pos.left = rolled_text_pos.left
     background.blit(button_text, button_text_pos)
 
-  top_player = Player(background, 0, RED, tile_centers, tile_length)
-  bottom_player = Player(background, 1, BLUE, tile_centers, tile_length)
+  top_player = Player(background, 0, RED, tiles, tile_length)
+  bottom_player = Player(background, 1, BLUE, tiles, tile_length)
 
   screen.blit(background, (0, 0))
 
