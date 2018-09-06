@@ -42,19 +42,6 @@ def roll_dice(surface, center, radius=10):
   pygame.draw.circle(surface, color, (center[0], center[1]), radius)
 
 
-def get_center_maker(tiles):
-  side_length = tiles[1].center[0] - tiles[0].center[0]
-  def get_center(player, index):
-    if index >= 5 and index <= 12:
-      return tiles[index-5].center
-    else:
-      if index < 5:
-        tile = tiles[4 - index].center
-      else:
-        tile = tiles[20 - index].center
-      return tile[0], tile[1] + (side_length if player else -side_length)
-  return get_center
-
 def add_piece(surface, center, color=RED):
   pygame.draw.circle(surface, color, center, 25)
 
@@ -86,11 +73,40 @@ class Player:
     if self.reserve < self.total:
       add_piece(self.screen, self.reserve_centers[self.reserve], self.color)
       self.reserve += 1
+      return True
+    return False
 
   def remove_reserve(self):
     if self.reserve > 0:
       self.reserve -= 1
       remove_piece(self.screen, self.reserve_centers[self.reserve])
+      return True
+    return False
+
+  def get_tile(self, index):
+    if index >= 5 and index <= 12:
+      return self.tiles[index-5]
+    else:
+      if index < 5:
+        tile = self.tiles[4 - index]
+      else:
+        tile = self.tiles[20 - index]
+    return tile.move(0, self.tile_length if self.side else -self.tile_length)
+
+  def add_piece(self, index):
+    if self.remove_reserve():
+      tile = self.get_tile(index)
+      add_piece(self.screen, tile.center, self.color)
+      return True
+    return False
+
+  def remove_piece(self,index):
+    if self.add_reserve():
+      tile = self.get_tile(index)
+      remove_piece(self.screen, tile.center)
+      return True
+    return False
+
 
 
 def main():
@@ -114,8 +130,6 @@ def main():
     tiles.append(pygame.draw.rect(background, WHITE, [(i + left_offset)*tile_length, 2*tile_length, tile_length, tile_length], TILE_WIDTH))
   # Color safe space differently
   pygame.draw.rect(background, GREEN, [(3 + left_offset)*tile_length, 2*tile_length, tile_length, tile_length], TILE_WIDTH)
-
-  get_center = get_center_maker(tiles)
 
   dice_centers = [((9 + left_offset) * tile_length + (i * tile_length), 2 * tile_length + tile_length // 3) for i in range(4)]
   spot_centers = []
@@ -146,9 +160,11 @@ def main():
 
   running = True
   while running:
+
     event = pygame.event.wait()
     if event.type == QUIT:
       running = False
+      break
 
     if event.type == MOUSEBUTTONUP:
       click = event.button
@@ -156,9 +172,8 @@ def main():
         bottom_player.add_reserve()
       elif click == 3: # right click
         bottom_player.remove_reserve()
-      screen.blit(background, (0, 0))
 
-
+    screen.blit(background, (0, 0))
     pygame.display.update()
 
 
