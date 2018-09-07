@@ -37,10 +37,24 @@ def draw_triangle(surface, color, center, side, thickness=5):
   return x, spot_y_center
 
 
-def roll_dice(surface, center, radius=10):
-  color = WHITE if random.randint(0, 1) else BLACK
+def draw_dice(surface, center, radius=10):
+  roll = random.randint(0, 1)
+  color = WHITE if roll else BLACK
   pygame.draw.circle(surface, color, (center[0], center[1]), radius)
+  return roll
 
+def roll_dice(surface, centers, radius=10):
+  total = 0
+  for center in centers:
+    total += draw_dice(surface, center, radius)
+  return total
+
+def update_roll_maker(screen, pos, spot_centers):
+  font = pygame.font.Font(None, 100)
+  def update_roll():
+    rolled_text = font.render("You rolled a: %d" % (roll_dice(screen, spot_centers),), True, RED, GREY)
+    screen.blit(rolled_text, pos)
+  return update_roll
 
 def add_piece(surface, center, color=RED):
   pygame.draw.circle(surface, color, center, 25)
@@ -163,17 +177,17 @@ def main():
   spot_centers = []
   for center in dice_centers:
     spot_center = draw_triangle(background, WHITE, center, 3 * tile_length // 7)
-    roll_dice(background, spot_center)
     spot_centers.append(spot_center)
 
 
   if pygame.font:
     font = pygame.font.Font(None, 100)
 
-    rolled_text = font.render("You rolled a:", True, RED, GREY)
+    rolled_text = font.render("You rolled a: %d" % (roll_dice(background, spot_centers),), True, RED, GREY)
     rolled_text_pos = rolled_text.get_rect()
     rolled_text_pos.midtop = ((10 + left_offset) * tile_length, 3 * tile_length)
     background.blit(rolled_text, rolled_text_pos)
+    update_roll = update_roll_maker(background, rolled_text_pos, spot_centers)
 
     button_text = font.render("Roll", True, BLUE, GREY)
     button_text_pos = button_text.get_rect()
@@ -198,7 +212,7 @@ def main():
       if click == 1: # left click
         board.left_click(event.pos)
       elif click == 3: # right click
-        board.remove_reserve(player)
+        update_roll()
 
     screen.blit(background, (0, 0))
     pygame.display.update()
