@@ -49,12 +49,6 @@ def roll_dice(surface, centers, radius=10):
     total += draw_dice(surface, center, radius)
   return total
 
-def update_roll_maker(screen, pos, spot_centers):
-  font = pygame.font.Font(None, 100)
-  def update_roll():
-    rolled_text = font.render("You rolled a: %d" % (roll_dice(screen, spot_centers),), True, RED, GREY)
-    screen.blit(rolled_text, pos)
-  return update_roll
 
 def add_piece(surface, center, color=RED):
   pygame.draw.circle(surface, color, center, 25)
@@ -135,6 +129,22 @@ class Board:
     self.top_player.other = self.bottom_player
     self.bottom_player.other = self.top_player
 
+    self.player_turn = 0
+
+  def init_font(self, spot_centers, rolled_text_pos, button_text_pos):
+    self.font = pygame.font.Font(None, 100)
+    self.spot_centers = spot_centers
+    self.rolled_text_pos = rolled_text_pos
+    self.button_text_pos = button_text_pos
+
+  def click_roll(self):
+    rolled_color, button_color = (RED, WHITE) if self.player_turn else (BLUE, WHITE)
+    rolled_text = self.font.render("You rolled a: %d" % (roll_dice(self.screen, self.spot_centers),), True, rolled_color, GREY)
+    button_text = self.font.render("Roll", True, button_color, GREY)
+    self.screen.blit(rolled_text, self.rolled_text_pos)
+    self.screen.blit(button_text, self.button_text_pos)
+    self.player_turn = 1 - self.player_turn
+
   def add_reserve(self, player):
     return self.get_player(player).add_reserve()
 
@@ -183,19 +193,24 @@ def main():
   if pygame.font:
     font = pygame.font.Font(None, 100)
 
-    rolled_text = font.render("You rolled a: %d" % (roll_dice(background, spot_centers),), True, RED, GREY)
+    rolled_color = RED
+    rolled_text = font.render("You rolled a: %d" % (roll_dice(background, spot_centers),), True, rolled_color, GREY)
     rolled_text_pos = rolled_text.get_rect()
     rolled_text_pos.midtop = ((10 + left_offset) * tile_length, 3 * tile_length)
     background.blit(rolled_text, rolled_text_pos)
-    update_roll = update_roll_maker(background, rolled_text_pos, spot_centers)
 
-    button_text = font.render("Roll", True, BLUE, GREY)
+
+    button_color = WHITE
+    button_text = font.render("Roll", True, button_color, GREY)
     button_text_pos = button_text.get_rect()
     button_text_pos.top = 1 * tile_length
     button_text_pos.left = rolled_text_pos.left
     background.blit(button_text, button_text_pos)
+    pygame.draw.rect(background, BLACK, button_text_pos, 3)
+
 
   board = Board(background, tiles, tile_length)
+  board.init_font(spot_centers, rolled_text_pos, button_text_pos)
   screen.blit(background, (0, 0))
 
   running = True
@@ -208,11 +223,11 @@ def main():
 
     if event.type == MOUSEBUTTONUP:
       click = event.button
-      player = event.pos[1] > tiles[0].centery
       if click == 1: # left click
-        board.left_click(event.pos)
-      elif click == 3: # right click
-        update_roll()
+        if button_text_pos.collidepoint(event.pos):
+          board.click_roll()
+        else:
+          board.left_click(event.pos)
 
     screen.blit(background, (0, 0))
     pygame.display.update()
