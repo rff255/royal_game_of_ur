@@ -107,10 +107,13 @@ class Board:
     self.bottom_player = Player(screen, 1, BLUE, tiles, tile_length)
 
   def add_reserve(self, player):
-    return (self.bottom_player if player else self.top_player).add_reserve()
+    return self.get_player(player).add_reserve()
 
   def remove_reserve(self, player):
-    return (self.bottom_player if player else self.top_player).remove_reserve()
+    return self.get_player(player).remove_reserve()
+
+  def get_player(self, player):
+    return self.bottom_player if player else self.top_player
 
 
 def main():
