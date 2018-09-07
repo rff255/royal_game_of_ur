@@ -61,6 +61,7 @@ class Player:
     self.total = 7
     self.reserve = 0
     self.finished = 0
+    self.other = None
 
     self.reserve_centers = [
       (tiles[0].center[0] + i * 75,
@@ -85,17 +86,29 @@ class Player:
     return False
 
   def add_piece(self, index):
-    if self.remove_reserve():
+    if not self.pieces[index] and self.remove_reserve():
+      if self.is_shared(index) and self.other.pieces[index]:
+        self.other.remove_piece(index)
       add_piece(self.screen, self.tiles[index].center, self.color)
+      self.pieces[index] = 1
       return True
     return False
 
-  def remove_piece(self,index):
-    if self.add_reserve():
+  def remove_piece(self, index):
+    if self.pieces[index] and self.add_reserve():
       remove_piece(self.screen, self.tiles[index].center)
+      self.pieces[index] = 0
       return True
     return False
 
+  def get_index(self, pos):
+    try:
+      return [tile.collidepoint(pos) for tile in self.tiles].index(True)
+    except ValueError:
+      return None
+
+  def is_shared(self, index):
+    return index >= 4 and index <= 11
 
 class Board:
   def __init__(self, screen, tiles, tile_length):
@@ -105,6 +118,8 @@ class Board:
 
     self.top_player = Player(screen, 0, RED, tiles, tile_length)
     self.bottom_player = Player(screen, 1, BLUE, tiles, tile_length)
+    self.top_player.other = self.bottom_player
+    self.bottom_player.other = self.top_player
 
   def add_reserve(self, player):
     return self.get_player(player).add_reserve()
@@ -114,6 +129,12 @@ class Board:
 
   def get_player(self, player):
     return self.bottom_player if player else self.top_player
+
+  def left_click(self, pos):
+    player = self.get_player(pos[1] > self.tiles[0].centery)
+    index = player.get_index(pos)
+    if index != None:
+      player.add_piece(index)
 
 
 def main():
@@ -175,7 +196,7 @@ def main():
       click = event.button
       player = event.pos[1] > tiles[0].centery
       if click == 1: # left click
-        board.add_reserve(player)
+        board.left_click(event.pos)
       elif click == 3: # right click
         board.remove_reserve(player)
 
