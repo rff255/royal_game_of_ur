@@ -84,20 +84,15 @@ class Player:
       return True
     return False
 
-  def get_tile(self, index):
-    return self.tiles[index]
-
   def add_piece(self, index):
     if self.remove_reserve():
-      tile = self.get_tile(index)
-      add_piece(self.screen, tile.center, self.color)
+      add_piece(self.screen, self.tiles[index].center, self.color)
       return True
     return False
 
   def remove_piece(self,index):
     if self.add_reserve():
-      tile = self.get_tile(index)
-      remove_piece(self.screen, tile.center)
+      remove_piece(self.screen, self.tiles[index].center)
       return True
     return False
 
