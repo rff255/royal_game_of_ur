@@ -54,7 +54,8 @@ class Player:
     self.screen = screen
     self.side = side
     self.color = color
-    self.tiles = tiles
+    safe_tiles = [t.move(0, tile_length if side else -tile_length) for t in tiles]
+    self.tiles = safe_tiles[:4] + tiles + safe_tiles[-2:]
     self.tile_length = tile_length
     self.pieces = [0]*14
     self.total = 7
@@ -84,14 +85,7 @@ class Player:
     return False
 
   def get_tile(self, index):
-    if index >= 5 and index <= 12:
-      return self.tiles[index-5]
-    else:
-      if index < 5:
-        tile = self.tiles[4 - index]
-      else:
-        tile = self.tiles[20 - index]
-    return tile.move(0, self.tile_length if self.side else -self.tile_length)
+    return self.tiles[index]
 
   def add_piece(self, index):
     if self.remove_reserve():
