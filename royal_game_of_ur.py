@@ -56,6 +56,12 @@ def add_piece(surface, center, color=RED):
 def remove_piece(surface, center, color=GREY):
   add_piece(surface, center, color)
 
+def highlight(surface, center, color=RED):
+  pygame.draw.circle(surface, color, center, 40, 5)
+
+def dehighlight(surface, center, color=GREY):
+  highlight(surface, center, color)
+
 
 class Player:
   def __init__(self, screen, side, color, tiles, tile_length):
@@ -93,6 +99,14 @@ class Player:
       return True
     return False
 
+  def highlight_reserve(self):
+    for center in (self.reserve_centers[i] for i in range(self.reserve)):
+      highlight(self.screen, center, self.color)
+
+  def dehighlight_reserve(self):
+    for center in (self.reserve_centers[i] for i in range(self.reserve)):
+      dehighlight(self.screen, center)
+
   def add_piece(self, index):
     if not self.pieces[index] and self.remove_reserve():
       if self.is_shared(index) and self.other.pieces[index]:
@@ -108,6 +122,12 @@ class Player:
       self.pieces[index] = 0
       return True
     return False
+
+  def highlight(self, index):
+    highlight(self.screen, self.tiles[index].center, self.color)
+
+  def dehighlight(self, index):
+    dehighlight(self.screen, self.tiles[index].center)
 
   def get_index(self, pos):
     try:
