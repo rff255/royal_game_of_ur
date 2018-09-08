@@ -4,6 +4,7 @@ import os
 import operator
 import random
 import math
+import enum
 
 import pygame
 from pygame.locals import *
@@ -85,6 +86,8 @@ class Player:
     for _ in range(self.total):
       self.add_reserve()
 
+    self.highlighted = []
+
   def add_reserve(self):
     if self.reserve < self.total:
       add_piece(self.screen, self.reserve_centers[self.reserve], self.color)
@@ -102,10 +105,7 @@ class Player:
   def highlight_reserve(self):
     for center in (self.reserve_centers[i] for i in range(self.reserve)):
       highlight(self.screen, center, self.color)
-
-  def dehighlight_reserve(self):
-    for center in (self.reserve_centers[i] for i in range(self.reserve)):
-      dehighlight(self.screen, center)
+      self.highlighted.append(center)
 
   def add_piece(self, index):
     if not self.pieces[index] and self.remove_reserve():
@@ -125,9 +125,19 @@ class Player:
 
   def highlight(self, index):
     highlight(self.screen, self.tiles[index].center, self.color)
+    self.highlighted.append(self.tiles[index].center)
 
-  def dehighlight(self, index):
-    dehighlight(self.screen, self.tiles[index].center)
+  def dehighlight(self):
+    for center in self.highlighted:
+      dehighlight(self.screen, center)
+    self.highlighted.clear()
+
+  def highlight_valid_pieces(self, roll):
+    self.highlight_reserve()
+
+  def highlight_valid_moves(self, index):
+    for i in range(len(self.pieces)):
+      self.highlight(i)
 
   def get_index(self, pos):
     try:
@@ -137,6 +147,13 @@ class Player:
 
   def is_shared(self, index):
     return index >= 4 and index <= 11
+
+
+class Waiting_For(enum.Enum):
+  ROLL      = 0
+  SELECT    = 1
+  MOVE  = 2
+
 
 class Board:
   def __init__(self, screen, tiles, tile_length):
@@ -151,6 +168,8 @@ class Board:
 
     self.player_turn = 0
 
+    self.status = Waiting_For.ROLL
+
   def init_font(self, spot_centers, rolled_text_pos, button_text_pos):
     self.font = pygame.font.Font(None, 100)
     self.spot_centers = spot_centers
@@ -158,12 +177,16 @@ class Board:
     self.button_text_pos = button_text_pos
 
   def click_roll(self):
-    rolled_color, button_color = (RED, WHITE) if self.player_turn else (BLUE, WHITE)
-    rolled_text = self.font.render("You rolled a: %d" % (roll_dice(self.screen, self.spot_centers),), True, rolled_color, GREY)
-    button_text = self.font.render("Roll", True, button_color, GREY)
-    self.screen.blit(rolled_text, self.rolled_text_pos)
-    self.screen.blit(button_text, self.button_text_pos)
-    self.player_turn = 1 - self.player_turn
+    if self.status == Waiting_For.ROLL:
+      rolled_color, button_color = (BLUE, WHITE) if self.player_turn else (RED, WHITE)
+      roll = roll_dice(self.screen, self.spot_centers)
+      rolled_text = self.font.render("You rolled a: %d" % (roll,), True, rolled_color, GREY)
+      button_text = self.font.render("Roll", True, button_color, GREY)
+      self.screen.blit(rolled_text, self.rolled_text_pos)
+      self.screen.blit(button_text, self.button_text_pos)
+
+      self.get_player(self.player_turn).highlight_valid_pieces(roll)
+      self.status = Waiting_For.SELECT
 
   def add_reserve(self, player):
     return self.get_player(player).add_reserve()
@@ -175,10 +198,24 @@ class Board:
     return self.bottom_player if player else self.top_player
 
   def left_click(self, pos):
-    player = self.get_player(pos[1] > self.tiles[0].centery)
-    index = player.get_index(pos)
-    if index != None:
-      player.add_piece(index)
+    click_player = pos[1] > self.tiles[0].centery
+    player = self.get_player(click_player)
+
+    if click_player == self.player_turn:
+      if self.status == Waiting_For.SELECT:
+        if (pos[1] - self.tiles[0].centery) * (1 if self.player_turn else -1) > 1.5 * self.tile_length:
+          player.dehighlight()
+          player.highlight_valid_moves(-1)
+          self.status = Waiting_For.MOVE
+
+      if self.status == Waiting_For.MOVE:
+        index = player.get_index(pos)
+        if index != None:
+          player.add_piece(index)
+          player.dehighlight()
+          self.status = Waiting_For.ROLL
+          self.player_turn = 1 - self.player_turn
+
 
 
 def main():
@@ -214,7 +251,7 @@ def main():
     font = pygame.font.Font(None, 100)
 
     rolled_color = RED
-    rolled_text = font.render("You rolled a: %d" % (roll_dice(background, spot_centers),), True, rolled_color, GREY)
+    rolled_text = font.render("You rolled a: %s" % (' ',), True, rolled_color, GREY)
     rolled_text_pos = rolled_text.get_rect()
     rolled_text_pos.midtop = ((10 + left_offset) * tile_length, 3 * tile_length)
     background.blit(rolled_text, rolled_text_pos)
