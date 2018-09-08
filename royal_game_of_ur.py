@@ -198,7 +198,7 @@ class Board:
     return self.bottom_player if player else self.top_player
 
   def left_click(self, pos):
-    click_player = pos[1] > self.tiles[0].centery
+    click_player = pos[1] > (self.tiles[0].top if self.player_turn else self.tiles[0].bottom)
     player = self.get_player(click_player)
 
     if click_player == self.player_turn:
