@@ -70,7 +70,7 @@ class Player:
     self.side = side
     self.color = color
     safe_tiles = [t.move(0, tile_length if side else -tile_length) for t in tiles]
-    self.tiles = safe_tiles[:4] + tiles + safe_tiles[-2:]
+    self.tiles = safe_tiles[3::-1] + tiles + safe_tiles[-2:]
     self.tile_length = tile_length
     self.pieces = [0]*14
     self.total = 7
@@ -87,6 +87,7 @@ class Player:
       self.add_reserve()
 
     self.highlighted = []
+    self.selected = -1
 
   def add_reserve(self):
     if self.reserve < self.total:
@@ -108,16 +109,23 @@ class Player:
       self.highlighted.append(center)
 
   def add_piece(self, index):
-    if not self.pieces[index] and self.remove_reserve():
+    if self.selected == -1:
+      if not self.remove_reserve():
+        return False
+
+    if not self.pieces[index]:
       if self.is_shared(index) and self.other.pieces[index]:
+        self.other.add_reserve()
         self.other.remove_piece(index)
       add_piece(self.screen, self.tiles[index].center, self.color)
       self.pieces[index] = 1
+      if self.selected != -1:
+        self.remove_piece(self.selected)
       return True
     return False
 
   def remove_piece(self, index):
-    if self.pieces[index] and self.add_reserve():
+    if self.pieces[index]:
       remove_piece(self.screen, self.tiles[index].center)
       self.pieces[index] = 0
       return True
@@ -153,7 +161,7 @@ class Player:
     try:
       return [tile.collidepoint(pos) for tile in self.tiles].index(True)
     except ValueError:
-      return None
+      return -1
 
   def is_shared(self, index):
     return index >= 4 and index <= 11
@@ -214,13 +222,15 @@ class Board:
     if click_player == self.player_turn:
       if self.status == Waiting_For.SELECT:
         if player.valid_select(pos, self.roll):
+          selection = player.get_index(pos)
           player.dehighlight()
-          player.highlight_valid_moves(-1)
+          player.highlight_valid_moves(selection)
+          player.selected = selection
           self.status = Waiting_For.MOVE
 
       elif self.status == Waiting_For.MOVE:
         index = player.get_index(pos)
-        if index != None:
+        if index != -1:
           player.add_piece(index)
           player.dehighlight()
           self.status = Waiting_For.ROLL
