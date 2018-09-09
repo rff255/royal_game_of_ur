@@ -134,10 +134,20 @@ class Player:
 
   def highlight_valid_pieces(self, roll):
     self.highlight_reserve()
+    for index, piece in enumerate(self.pieces):
+      if piece:
+        self.highlight(index)
 
   def highlight_valid_moves(self, index):
     for i in range(len(self.pieces)):
       self.highlight(i)
+
+  def reserve_click(self, pos):
+    return abs(pos[1] - self.reserve_centers[0][1]) < self.tile_length / 2
+
+  def valid_select(self, pos, roll):
+    return ((self.reserve > 0 and self.reserve_click(pos))
+      or any([self.tiles[index] for index, piece in enumerate(self.pieces) if piece]))
 
   def get_index(self, pos):
     try:
@@ -179,13 +189,13 @@ class Board:
   def click_roll(self):
     if self.status == Waiting_For.ROLL:
       rolled_color, button_color = (BLUE, WHITE) if self.player_turn else (RED, WHITE)
-      roll = roll_dice(self.screen, self.spot_centers)
-      rolled_text = self.font.render("You rolled a: %d" % (roll,), True, rolled_color, GREY)
+      self.roll = roll_dice(self.screen, self.spot_centers)
+      rolled_text = self.font.render("You rolled a: %d" % (self.roll,), True, rolled_color, GREY)
       button_text = self.font.render("Roll", True, button_color, GREY)
       self.screen.blit(rolled_text, self.rolled_text_pos)
       self.screen.blit(button_text, self.button_text_pos)
 
-      self.get_player(self.player_turn).highlight_valid_pieces(roll)
+      self.get_player(self.player_turn).highlight_valid_pieces(self.roll)
       self.status = Waiting_For.SELECT
 
   def add_reserve(self, player):
@@ -203,12 +213,12 @@ class Board:
 
     if click_player == self.player_turn:
       if self.status == Waiting_For.SELECT:
-        if (pos[1] - self.tiles[0].centery) * (1 if self.player_turn else -1) > 1.5 * self.tile_length:
+        if player.valid_select(pos, self.roll):
           player.dehighlight()
           player.highlight_valid_moves(-1)
           self.status = Waiting_For.MOVE
 
-      if self.status == Waiting_For.MOVE:
+      elif self.status == Waiting_For.MOVE:
         index = player.get_index(pos)
         if index != None:
           player.add_piece(index)
