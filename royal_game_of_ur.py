@@ -70,7 +70,8 @@ class Player:
     self.side = side
     self.color = color
     safe_tiles = [t.move(0, tile_length if side else -tile_length) for t in tiles]
-    self.tiles = safe_tiles[3::-1] + tiles + safe_tiles[-2:]
+    self.tiles = safe_tiles[3::-1] + tiles + safe_tiles[:-3:-1]
+    self.end = safe_tiles[4].union(safe_tiles[5])
     self.tile_length = tile_length
     self.pieces = [0]*14
     self.total = 7
@@ -133,9 +134,11 @@ class Player:
 
   def highlight(self, index):
     if index == len(self.pieces):
-      return
-    highlight(self.screen, self.tiles[index].center, self.color)
-    self.highlighted.append(self.tiles[index].center)
+      center = self.end.center
+    else:
+      center = self.tiles[index].center
+    highlight(self.screen, center, self.color)
+    self.highlighted.append(center)
 
   def dehighlight(self):
     for center in self.highlighted:
@@ -177,7 +180,7 @@ class Player:
 
   def get_index(self, pos):
     try:
-      return [tile.collidepoint(pos) for tile in self.tiles].index(True)
+      return ([tile.collidepoint(pos) for tile in self.tiles] + [self.end.collidepoint(pos)]).index(True)
     except ValueError:
       return -1
 
@@ -253,7 +256,11 @@ class Board:
       elif self.status == Waiting_For.MOVE:
         index = player.get_index(pos)
         if index != -1 and player.valid_select(pos):
-          player.add_piece(index)
+          if index == len(player.pieces):
+            player.remove_piece(player.selected)
+            player.finished += 1
+          else:
+            player.add_piece(index)
           player.dehighlight()
           self.status = Waiting_For.ROLL
           self.player_turn = 1 - self.player_turn
