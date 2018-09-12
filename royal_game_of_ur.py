@@ -167,9 +167,13 @@ class Player:
   def reserve_click(self, pos):
     return abs(pos[1] - self.reserve_centers[0][1]) < self.tile_length / 2
 
-  def valid_select(self, pos, roll):
-    return ((self.reserve > 0 and self.reserve_click(pos))
-      or any([self.tiles[index] for index, piece in enumerate(self.pieces) if piece]))
+  def valid_select(self, pos):
+    rect = pygame.Rect(0, 0, self.tile_length, self.tile_length)
+    for center in self.highlighted:
+      rect.center = center
+      if rect.collidepoint(pos):
+        return True
+    return False
 
   def get_index(self, pos):
     try:
@@ -239,7 +243,7 @@ class Board:
 
     if click_player == self.player_turn:
       if self.status == Waiting_For.SELECT:
-        if player.valid_select(pos, self.roll):
+        if player.valid_select(pos):
           selection = player.get_index(pos)
           player.dehighlight()
           player.highlight_valid_moves(selection, self.roll)
@@ -248,7 +252,7 @@ class Board:
 
       elif self.status == Waiting_For.MOVE:
         index = player.get_index(pos)
-        if index != -1:
+        if index != -1 and player.valid_select(pos):
           player.add_piece(index)
           player.dehighlight()
           self.status = Waiting_For.ROLL
