@@ -210,6 +210,10 @@ class Board:
       self.screen.blit(rolled_text, self.rolled_text_pos)
       self.screen.blit(button_text, self.button_text_pos)
 
+      if self.roll == 0:
+        self.player_turn = 1 - self.player_turn
+        return
+
       self.get_player(self.player_turn).highlight_valid_pieces(self.roll)
       self.status = Waiting_For.SELECT
 
