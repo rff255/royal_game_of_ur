@@ -163,8 +163,9 @@ class Player:
     elif potential_move == len(self.pieces):
       return True
     elif not self.pieces[potential_move]:
-      if self.is_shared(potential_move) and self.other.pieces[potential_move]:
-        return False
+      if self.is_shared(potential_move):
+        if self.other.pieces[potential_move] and potential_move == 7:
+          return False
       return True
 
   def reserve_click(self, pos):
