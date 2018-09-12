@@ -146,9 +146,16 @@ class Player:
       if piece:
         self.highlight(index)
 
-  def highlight_valid_moves(self, index):
-    for i in range(len(self.pieces)):
-      self.highlight(i)
+  def highlight_valid_moves(self, index, roll):
+    potential_move = index + roll
+    if potential_move > len(self.pieces):
+      return
+    elif potential_move == len(self.pieces):
+      self.highlight(potential_move)
+    elif not self.pieces[potential_move]:
+      if self.is_shared(potential_move) and self.other.pieces[potential_move]:
+        return
+      self.highlight(potential_move)
 
   def reserve_click(self, pos):
     return abs(pos[1] - self.reserve_centers[0][1]) < self.tile_length / 2
@@ -224,7 +231,7 @@ class Board:
         if player.valid_select(pos, self.roll):
           selection = player.get_index(pos)
           player.dehighlight()
-          player.highlight_valid_moves(selection)
+          player.highlight_valid_moves(selection, self.roll)
           player.selected = selection
           self.status = Waiting_For.MOVE
 
