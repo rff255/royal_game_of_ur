@@ -226,11 +226,19 @@ class Board:
       self.screen.blit(button_text, self.button_text_pos)
 
       if self.roll == 0:
-        self.player_turn = 1 - self.player_turn
+        self.change_player()
         return
 
       self.get_player(self.player_turn).highlight_valid_pieces(self.roll)
+
+      if len(self.get_player(self.player_turn).highlighted) == 0:
+        self.change_player()
+        return
+
       self.status = Waiting_For.SELECT
+
+  def change_player(self):
+    self.player_turn = 1 - player_turn
 
   def add_reserve(self, player):
     return self.get_player(player).add_reserve()
@@ -264,7 +272,7 @@ class Board:
             player.add_piece(index)
           player.dehighlight()
           self.status = Waiting_For.ROLL
-          self.player_turn = 1 - self.player_turn
+          self.change_player()
 
 
 
