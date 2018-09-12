@@ -132,6 +132,8 @@ class Player:
     return False
 
   def highlight(self, index):
+    if index == len(self.pieces):
+      return
     highlight(self.screen, self.tiles[index].center, self.color)
     self.highlighted.append(self.tiles[index].center)
 
@@ -141,21 +143,26 @@ class Player:
     self.highlighted.clear()
 
   def highlight_valid_pieces(self, roll):
-    self.highlight_reserve()
+    if roll <= 4 and not self.pieces[roll-1]:
+      self.highlight_reserve()
     for index, piece in enumerate(self.pieces):
-      if piece:
+      if piece and self.is_valid_move(index, roll):
         self.highlight(index)
 
   def highlight_valid_moves(self, index, roll):
+    if self.is_valid_move(index, roll):
+      self.highlight(index + roll)
+
+  def is_valid_move(self, index, roll):
     potential_move = index + roll
     if potential_move > len(self.pieces):
-      return
+      return False
     elif potential_move == len(self.pieces):
-      self.highlight(potential_move)
+      return True
     elif not self.pieces[potential_move]:
       if self.is_shared(potential_move) and self.other.pieces[potential_move]:
-        return
-      self.highlight(potential_move)
+        return False
+      return True
 
   def reserve_click(self, pos):
     return abs(pos[1] - self.reserve_centers[0][1]) < self.tile_length / 2
