@@ -200,6 +200,7 @@ class Board:
     self.screen = screen
     self.tiles = tiles
     self.tile_length = tile_length
+    self.double_roll = [3, 7, 12]
 
     self.top_player = Player(screen, 0, RED, tiles, tile_length)
     self.bottom_player = Player(screen, 1, BLUE, tiles, tile_length)
@@ -238,7 +239,7 @@ class Board:
       self.status = Waiting_For.SELECT
 
   def change_player(self):
-    self.player_turn = 1 - player_turn
+    self.player_turn = 1 - self.player_turn
 
   def add_reserve(self, player):
     return self.get_player(player).add_reserve()
@@ -272,7 +273,8 @@ class Board:
             player.add_piece(index)
           player.dehighlight()
           self.status = Waiting_For.ROLL
-          self.change_player()
+          if index not in self.double_roll:
+            self.change_player()
 
 
 
@@ -297,6 +299,9 @@ def main():
     tiles.append(pygame.draw.rect(background, WHITE, [(i + left_offset)*tile_length, 2*tile_length, tile_length, tile_length], TILE_WIDTH))
   # Color safe space differently
   pygame.draw.rect(background, GREEN, [(3 + left_offset)*tile_length, 2*tile_length, tile_length, tile_length], TILE_WIDTH)
+  for j in [1, 3]:
+    for i in [0, 7]:
+      pygame.draw.rect(background, GREEN, [(i + left_offset)*tile_length, j*tile_length, tile_length, tile_length], TILE_WIDTH)
 
   dice_centers = [((9 + left_offset) * tile_length + (i * tile_length), 2 * tile_length + tile_length // 3) for i in range(4)]
   spot_centers = []
