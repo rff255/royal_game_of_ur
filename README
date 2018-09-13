@@ -36,6 +36,6 @@ You must roll exactly 1 more than the number of tiles remaining between your pie
 Red Player goes first.
 
 1. Click the Roll button. The value you rolled is displayed. Any pieces that have a valid move are now "highlighted" with a ring appearing around them.
-2. Click on one of the highlighted pieces to select it. Any valid destination is now highlighted.
-3. Click on one of the highlighted spaces to move to it.
+2. Hover over one of the highlighted pieces. An empty circle will appear on the board representing where that piece would move to.
+3. Click to move the selected piece to the indicated tile.
 4. If you landed on a green tile, go back to step 1. Otherwise, it is now the other player's turn.
