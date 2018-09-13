@@ -1,3 +1,30 @@
 # Dependencies
 
 Run with python3 and pygame
+
+# Rules
+
+https://en.wikipedia.org/wiki/Royal_Game_of_Ur#Basic_rules
+
+The Royal Game of Ur is a racing board game. Both players are competing to run their pieces across the board before their oppoenent. The basic turn is as follows:
+
+1. Roll the dice
+2. Make a valid move.
+  a) If you can make no valid moves or you rolled a 0, your turn is over.
+3. If you landed on a green tile, go again (go to step 1)
+4. Your turn is over, and your opponent begins from step 1.
+
+
+## Valid Move
+
+Only one piece can occupy a tile at any given time.
+You can move onto a tile occupied by your opponent's piece, as long as it is not on a green tile: their piece is returned to their reserve.
+You can not move onto a tile occupied by your own pieces.
+
+### Entering the board
+
+Rolling a 1, 2, 3, or 4 allows you to place a piece on the 1st, 2nd, 3rd, or 4th tile on the board from your reserve, respectively.
+
+### Exiting the board
+
+You must roll exactly 1 more than the number of tiles remaining between your piece and the end of the board. There are 14 total tiles on each players track: this means you need a roll such that your piece lands exactly on the "fifteenth tile".
