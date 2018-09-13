@@ -269,6 +269,8 @@ class Board:
           if index == len(player.pieces):
             player.remove_piece(player.selected)
             player.finished += 1
+            if player.finished == player.total:
+              self.game_over()
           else:
             player.add_piece(index)
           player.dehighlight()
@@ -276,6 +278,12 @@ class Board:
           if index not in self.double_roll:
             self.change_player()
 
+  def game_over(self):
+    color, name = (BLUE, "BLUE") if self.player_turn else (RED, "RED")
+    text = self.font.render("Player %s wins!" % (name,), True, color, GREY)
+    pos = text.get_rect()
+    pos.center = self.screen.get_rect().center
+    self.screen.blit(text, pos)
 
 
 def main():
