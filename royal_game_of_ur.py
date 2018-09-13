@@ -88,6 +88,7 @@ class Player:
       self.add_reserve()
 
     self.highlighted = []
+    self.hover_highlighted = []
     self.selected = -1
 
   def add_reserve(self):
@@ -132,18 +133,24 @@ class Player:
       return True
     return False
 
-  def highlight(self, index):
+  def highlight(self, index, hover=False):
     if index == len(self.pieces):
       center = self.end.center
     else:
       center = self.tiles[index].center
+    if hover:
+      if center in self.hover_highlighted:
+        return
+      self.hover_highlighted.append(center)
+    else:
+      self.highlighted.append(center)
     highlight(self.screen, center, self.color)
-    self.highlighted.append(center)
 
-  def dehighlight(self):
-    for center in self.highlighted:
+  def dehighlight(self, hover=False):
+    target = self.hover_highlighted if hover else self.highlighted
+    for center in target:
       dehighlight(self.screen, center)
-    self.highlighted.clear()
+    target.clear()
 
   def highlight_valid_pieces(self, roll):
     if roll <= 4 and not self.pieces[roll-1]:
@@ -152,11 +159,15 @@ class Player:
       if piece and self.is_valid_move(index, roll):
         self.highlight(index)
 
-  def highlight_valid_moves(self, index, roll):
+  def highlight_valid_moves(self, index, roll, hover=False):
     if self.is_valid_move(index, roll):
-      self.highlight(index + roll)
+      self.highlight(index + roll, hover)
 
   def is_valid_move(self, index, roll):
+    if index == -1 and self.reserve == 0:
+      return False
+    elif index >= 0 and index < len(self.pieces) and not self.pieces[index]:
+      return False
     potential_move = index + roll
     if potential_move > len(self.pieces):
       return False
@@ -274,9 +285,18 @@ class Board:
           else:
             player.add_piece(index)
           player.dehighlight()
+          player.dehighlight(hover=True)
           self.status = Waiting_For.ROLL
           if index not in self.double_roll:
             self.change_player()
+
+  def hover(self, pos):
+    player = self.get_player(self.player_turn)
+    if self.status == Waiting_For.SELECT:
+      player.dehighlight(hover=True)
+      if player.valid_select(pos):
+        selection = player.get_index(pos)
+        player.highlight_valid_moves(selection, self.roll, hover=True)
 
   def game_over(self):
     color, name = (BLUE, "BLUE") if self.player_turn else (RED, "RED")
@@ -356,6 +376,9 @@ def main():
           board.click_roll()
         else:
           board.left_click(event.pos)
+
+    if event.type == MOUSEMOTION:
+      board.hover(pygame.mouse.get_pos())
 
     screen.blit(background, (0, 0))
     pygame.display.update()
