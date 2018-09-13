@@ -203,7 +203,6 @@ class Player:
 class Waiting_For(enum.Enum):
   ROLL      = 0
   SELECT    = 1
-  MOVE  = 2
 
 
 class Board:
@@ -267,27 +266,23 @@ class Board:
 
     if click_player == self.player_turn:
       if self.status == Waiting_For.SELECT:
-        if player.valid_select(pos):
+        if len(player.hover_highlighted) > 0:
           selection = player.get_index(pos)
           player.dehighlight()
-          player.highlight_valid_moves(selection, self.roll)
           player.selected = selection
-          self.status = Waiting_For.MOVE
 
-      elif self.status == Waiting_For.MOVE:
-        index = player.get_index(pos)
-        if index != -1 and player.valid_select(pos):
-          if index == len(player.pieces):
+          destination = selection + self.roll
+          if destination == len(player.pieces):
             player.remove_piece(player.selected)
             player.finished += 1
             if player.finished == player.total:
               self.game_over()
           else:
-            player.add_piece(index)
+            player.add_piece(destination)
           player.dehighlight()
           player.dehighlight(hover=True)
           self.status = Waiting_For.ROLL
-          if index not in self.double_roll:
+          if destination not in self.double_roll:
             self.change_player()
 
   def hover(self, pos):
