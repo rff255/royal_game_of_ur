@@ -15,6 +15,7 @@ The Royal Game of Ur is a racing board game. Both players are competing to run t
 3. If you landed on a green tile, go again (go to step 1)
 4. Your turn is over, and your opponent begins from step 1.
 
+Each "dice" has 4 sides: 2 are marked black, 2 are marked white. Each roll consists of rolling 4 of these dice simultaneously. The number of white spots is added up and becomes your roll. This means it is possible to roll a 0, 1, 2, 3, or 4.
 
 ## Valid Move
 
@@ -29,3 +30,12 @@ Rolling a 1, 2, 3, or 4 allows you to place a piece on the 1st, 2nd, 3rd, or 4th
 ### Exiting the board
 
 You must roll exactly 1 more than the number of tiles remaining between your piece and the end of the board. There are 14 total tiles on each players track: this means you need a roll such that your piece lands exactly on the "fifteenth tile".
+
+# Instructions
+
+Red Player goes first.
+
+1. Click the Roll button. The value you rolled is displayed. Any pieces that have a valid move are now "highlighted" with a ring appearing around them.
+2. Click on one of the highlighted pieces to select it. Any valid destination is now highlighted.
+3. Click on one of the highlighted spaces to move to it.
+4. If you landed on a green tile, go back to step 1. Otherwise, it is now the other player's turn.
