@@ -205,7 +205,7 @@ class Board:
     self.screen = screen
     self.tiles = tiles
     self.tile_length = tile_length
-    self.double_roll = [3, 7, 12]
+    self.double_roll = [3, 7, 13]
 
     self.top_player = Player(screen, 0, RED, tiles, tile_length)
     self.bottom_player = Player(screen, 1, BLUE, tiles, tile_length)
@@ -318,7 +318,7 @@ def main():
   # Color safe space differently
   pygame.draw.rect(background, GREEN, [(3 + left_offset)*tile_length, 2*tile_length, tile_length, tile_length], TILE_WIDTH)
   for j in [1, 3]:
-    for i in [0, 7]:
+    for i in [0, 6]:
       pygame.draw.rect(background, GREEN, [(i + left_offset)*tile_length, j*tile_length, tile_length, tile_length], TILE_WIDTH)
 
   dice_centers = [((9 + left_offset) * tile_length + (i * tile_length), 2 * tile_length + tile_length // 3) for i in range(4)]
