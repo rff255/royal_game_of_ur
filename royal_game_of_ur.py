@@ -1,10 +1,8 @@
 #!/usr/bin/python3
 
-import os
 import operator
 import random
 import math
-import enum
 
 import pygame
 from pygame.locals import *
@@ -12,12 +10,9 @@ from pygame.locals import *
 if not pygame.font: print ('Warning, fonts disabled')
 if not pygame.mixer: print ('Warning, sound disabled')
 
-main_dir = os.path.split(os.path.abspath(__file__))[0]
-data_dir = os.path.join(main_dir, 'data')
 
-
-SCREEN_WIDTH    = 1920
-SCREEN_HEIGHT   = 1080
+SCREEN_WIDTH    = 800
+SCREEN_HEIGHT   = 300
 
 BLACK           = (0, 0, 0)
 GREY            = (100, 100, 100)
@@ -26,7 +21,7 @@ RED             = (255, 0, 0)
 GREEN           = (0, 255, 0)
 BLUE            = (0, 0, 255)
 
-TILE_WIDTH      = 10
+TILE_WIDTH      = 4
 
 
 def draw_triangle(surface, color, center, side, thickness=5):
@@ -38,13 +33,13 @@ def draw_triangle(surface, color, center, side, thickness=5):
   return x, spot_y_center
 
 
-def draw_dice(surface, center, radius=10):
+def draw_dice(surface, center, radius=4):
   roll = random.randint(0, 1)
   color = WHITE if roll else BLACK
   pygame.draw.circle(surface, color, (center[0], center[1]), radius)
   return roll
 
-def roll_dice(surface, centers, radius=10):
+def roll_dice(surface, centers, radius=4):
   total = 0
   for center in centers:
     total += draw_dice(surface, center, radius)
@@ -52,13 +47,13 @@ def roll_dice(surface, centers, radius=10):
 
 
 def add_piece(surface, center, color=RED):
-  pygame.draw.circle(surface, color, center, 25)
+  pygame.draw.circle(surface, color, center, 12)
 
 def remove_piece(surface, center, color=GREY):
   add_piece(surface, center, color)
 
 def highlight(surface, center, color=RED):
-  pygame.draw.circle(surface, color, center, 40, 5)
+  pygame.draw.circle(surface, color, center, 20, 2)
 
 def dehighlight(surface, center, color=GREY):
   highlight(surface, center, color)
@@ -200,7 +195,7 @@ class Player:
     return index >= 4 and index <= 11
 
 
-class Waiting_For(enum.Enum):
+class Waiting_For:
   ROLL      = 0
   SELECT    = 1
 
@@ -222,7 +217,7 @@ class Board:
     self.status = Waiting_For.ROLL
 
   def init_font(self, spot_centers, rolled_text_pos, button_text_pos):
-    self.font = pygame.font.Font(None, 100)
+    self.font = pygame.font.Font(None, 40)
     self.spot_centers = spot_centers
     self.rolled_text_pos = rolled_text_pos
     self.button_text_pos = button_text_pos
@@ -334,7 +329,7 @@ def main():
 
 
   if pygame.font:
-    font = pygame.font.Font(None, 100)
+    font = pygame.font.Font(None, 40)
 
     rolled_color = RED
     rolled_text = font.render("You rolled a: %s" % (' ',), True, rolled_color, GREY)
